@@ -19,7 +19,8 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ChatWsHandler implements WsMessageHandler {
+public class ChatWsHandler implements WsMessageHandler
+{
 
     private final ChatService chatService;
     private final ChatDelivery delivery;
@@ -28,21 +29,25 @@ public class ChatWsHandler implements WsMessageHandler {
     private final ChatCommands commands;
 
     @Override
-    public String type() {
+    public String type()
+    {
         return "chat";
     }
 
     @Override
-    public void handle(WsMessageContext context, JsonNode message) {
+    public void handle(WsMessageContext context, JsonNode message)
+    {
         String content = readContent(message);
 
-        if (content.isBlank() || content.length() > 200) {
+        if (content.isBlank() || content.length() > 200)
+        {
             throw new IllegalArgumentException("채팅은 1~200자로 입력해 주세요.");
         }
 
         Long playerId = (Long) context.session().getAttributes()
                 .get(NicknameHandshakeInterceptor.ATTR_PLAYER_ID);
-        if (!rateLimit.allow(playerId)) {
+        if (!rateLimit.allow(playerId))
+        {
             broadcaster.sendTo(context.session(), new Error("CHAT_COOLDOWN"));
             return;
         }
@@ -53,13 +58,25 @@ public class ChatWsHandler implements WsMessageHandler {
         delivery.send(context.worldId(), response);
     }
 
-    private String readContent(JsonNode message) {
+    private String readContent(JsonNode message)
+    {
         // TODO Lv 13: API 명세의 채팅 내용을 읽습니다.
-        return "";
+        return WsFields.text(message, "content");
     }
 
-    private ChatResponse createResponse(WsMessageContext context, String content) {
+    private ChatResponse createResponse(WsMessageContext context, String content)
+    {
         // TODO Lv 13: 현재 연결의 사용자로 저장하고 명세에 맞는 응답을 만듭니다.
-        return null;
+        ChatMessageResponse saved = chatService.saveMessage(
+                context.worldId(),
+                context.nickname(),
+                content
+        );
+
+        return new ChatResponse(
+                saved.getSender(),
+                saved.getContent(),
+                saved.getCreatedAt()
+        );
     }
 }
