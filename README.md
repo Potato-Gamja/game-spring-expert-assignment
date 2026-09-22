@@ -75,15 +75,3 @@ WebSocket을 이용한 실시간 통신 등을 학습하고 구현하는 것을 
 - 현재 월드의 접속 사용자 조회
 - 접속 중인 WebSocket Session 기준 사용자 목록 생성
 
----
-
-## 🗄 Database
-
-MySQL을 Docker로 실행합니다.
-
-```bash
-docker run --name game-mysql \
-  -e MYSQL_ROOT_PASSWORD=1234 \
-  -e MYSQL_DATABASE=game \
-  -p 13306:3306 \
-  -d mysql:8.0
